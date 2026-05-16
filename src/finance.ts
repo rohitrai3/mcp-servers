@@ -75,6 +75,7 @@ server.registerTool(
   async () => {
     const response = await fetch(`${financeUrl}/ping`)
       .then(res => res.json())
+      .then(data => data)
       .catch(err => console.log("Error pinging:", err));
 
     let status = "Offline";
