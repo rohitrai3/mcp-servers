@@ -26,6 +26,17 @@ server.registerTool(
     },
   },
   async ({ amount, type, description, tags, date }) => {
+    if (!financeUrl) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Finance app is offline due to url not defined",
+          },
+        ],
+      };
+    }
+
     console.log("amount:", amount);
     console.log("type:", type);
     console.log("description:", description);
@@ -73,6 +84,17 @@ server.registerTool(
     description: "Check status of Finance app",
   },
   async () => {
+    if (!financeUrl) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Finance app is offline due to url not defined",
+          },
+        ],
+      };
+    }
+
     const response = await fetch(`${financeUrl}/ping`)
       .then(res => res.json())
       .then(data => data)
