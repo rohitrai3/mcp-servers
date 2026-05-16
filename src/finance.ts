@@ -1,11 +1,21 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { config } from "dotenv";
+import { createLogger, format, transports } from "winston";
 import { z } from "zod";
 
 config();
 
 const financeUrl = process.env.FINANCE_URL;
+const logger = createLogger({
+  format: format.combine(
+    format.timestamp(),
+    format.printf(({ timestamp, level, message }) => `[${timestamp}][${level}]${message}`)
+  ),
+  transports: [
+    new transports.File({ filename: "finance-mcp-server.log" }),
+  ],
+});
 
 const server = new McpServer({
   name: "finance",
@@ -26,22 +36,8 @@ server.registerTool(
     },
   },
   async ({ amount, type, description, tags, date }) => {
-    if (!financeUrl) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: "Finance app is offline due to url not defined",
-          },
-        ],
-      };
-    }
+    if (!financeUrl) logger.info("FINANCE_URL is undefined");
 
-    console.log("amount:", amount);
-    console.log("type:", type);
-    console.log("description:", description);
-    console.log("tags:", tags);
-    console.log("date:", date);
     const response = await fetch(
       `${financeUrl}/transaction/add`,
       {
@@ -84,33 +80,27 @@ server.registerTool(
     description: "Check status of Finance app",
   },
   async () => {
-    if (!financeUrl) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: "Finance app is offline due to url not defined",
-          },
-        ],
-      };
-    }
+    if (!financeUrl) logger.info("FINANCE_URL is undefined");
 
     const response = await fetch(`${financeUrl}/ping`)
       .then(res => res.json())
       .then(data => data)
-      .catch(err => console.log("Error pinging:", err));
+      .catch(err => logger.error(`Error pinging: ${err}`));
 
     let status = "Offline";
 
     if (response && response.status === "success") {
       status = "Online";
+      logger.info("Finance app is online.");
+    } else {
+      logger.info(`Finance app is offline: ${response}`);
     }
 
     return {
       content: [
         {
           type: "text",
-          text: `Finance app is ${status}`,
+          text: `Finance app is ${status}.`,
         },
       ],
     };
@@ -120,11 +110,11 @@ server.registerTool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Finance MCP Server running on stdio");
+  logger.error("Finance MCP Server running on stdio");
 }
 
 main().catch(err => {
-  console.error("Fatal error in main(): ", err);
+  logger.error("Fatal error in main(): ", err);
   process.exit(1);
 });
 
