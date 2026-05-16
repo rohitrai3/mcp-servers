@@ -79,7 +79,7 @@ server.registerTool(
 
     let status = "Offline";
 
-    if (response && response.status === "Successful") {
+    if (response && response.status === "success") {
       status = "Online";
     }
 
