@@ -13,7 +13,7 @@ const logger = createLogger({
     format.printf(({ timestamp, level, message }) => `[${timestamp}][${level}]${message}`)
   ),
   transports: [
-    new transports.File({ filename: "finance-mcp-server.log" }),
+    new transports.File({ filename: "logs/finance-mcp-server.log" }),
   ],
 });
 
