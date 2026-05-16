@@ -31,16 +31,15 @@ server.registerTool(
     console.log("description:", description);
     console.log("tags:", tags);
     console.log("date:", date);
-    // const response = await fetch(
-    //   `${financeUrl}transaction/add`,
-    //   {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ amount: amount }),
-    //   }
-    // );
-    // const transaction = await response.json();
-    const transaction = null;
+    const response = await fetch(
+      `${financeUrl}/transaction/add`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: amount }),
+      }
+    );
+    const transaction = await response.json();
 
     if (!transaction) {
 
@@ -54,7 +53,6 @@ server.registerTool(
       };
     }
 
-    // const responseText = `Transaction amount of ${transaction.amount} is added.`;
     const responseText = `amount: ${amount}, type: ${type}, description: ${description}, tags: ${tags}, date: ${date}.`;
 
     return {
@@ -75,7 +73,7 @@ server.registerTool(
     description: "Check status of Finance app",
   },
   async () => {
-    const response = await fetch(`${financeUrl}ping`)
+    const response = await fetch(`${financeUrl}/ping`)
       .then(res => res.json())
       .catch(err => console.log("Error pinging:", err));
 
